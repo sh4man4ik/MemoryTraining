@@ -21,7 +21,7 @@ const CARD_URL = "https://cdn.jsdelivr.net/gh/hayeah/playing-cards-assets@master
 const cardHtml = (r, s) => `<img class="cimg" src="${CARD_URL}${r}_of_${s}.svg" alt="${r} of ${s}" />`;
 
 const PHOTO_IDS = Array.from({ length: 90 }, (_, i) => i + 10).filter((i) => i !== 86 && i !== 97);
-const photoHtml = (id) => `<img class="pimg" loading="lazy" src="https://picsum.photos/id/${id}/300/300" alt="" />`;
+const photoHtml = (id) => `<img class="pimg" src="https://picsum.photos/id/${id}/300/300" alt="" />`;
 
 const INTL = ["fakerDE", "fakerFR", "fakerES", "fakerIT", "fakerPL", "fakerTR", "fakerPT_BR", "fakerNL", "fakerSV", "fakerCS_CZ"].map((k) => F[k]).filter(Boolean);
 const PORTRAITS = [...Array.from({ length: 100 }, (_, i) => ["men", i]), ...Array.from({ length: 100 }, (_, i) => ["women", i])];
@@ -80,7 +80,7 @@ const MODES = [
 		gen: (n) => {
 			const set = new Set();
 			while (set.size < n) { const w = fakerEN.word.noun().toLowerCase(); if (w.length >= 3 && w.length <= 10 && /^[a-z]+$/.test(w)) set.add(w); }
-			return { kind: "type", items: [...set].map((w) => ({ html: w, prompt: "", ans: [w], ph: ["word"] })) };
+			return { kind: "type", items: [...set].map((w) => ({ html: `<span class="w">${w}</span>`, prompt: "", ans: [w], ph: ["word"] })) };
 		}
 	},
 ];
@@ -159,8 +159,18 @@ const PHASES = [
 	{ k: "rec", label: "Recall ends in", skip: "Finished" },
 ];
 
+function preload(d) {
+	const urls = new Set();
+	[...d.items, ...(d.pool || [])].forEach((it) => {
+		const m = /src="([^"]+)"/.exec(it.html || "");
+		if (m) urls.add(m[1]);
+	});
+	urls.forEach((u) => { const im = new Image(); im.src = u; });
+}
+
 function start(m, n) {
 	G = { m, n, data: m.gen(n), timer: null, idx: 0, stage: "" };
+	preload(G.data);
 	showView("play");
 	phase(0);
 }
@@ -179,21 +189,25 @@ document.addEventListener("keydown", (e) => {
 
 function drawViewer() {
 	const { items } = G.data, i = G.idx, id = G.m.id, n = items.length;
-	const idx = (j) => (id === "words" || id === "numbers" ? `<small>${j + 1}.</small>` : "");
-	const mini = (it, j) => `<button class="mini" data-j="${j}">${idx(j)}${it.html}</button>`;
+	const mini = (it, j, on) => `<button class="mini${on ? " on" : ""}" data-j="${j}">${it.html}</button>`;
 	const from = Math.max(0, i - 8);
 	$("#body").innerHTML = `<div class="viewer ${id}">
-		<div class="side">${items.slice(from, i).map((it, k) => mini(it, from + k)).join("")}</div>
-		<div class="cur">${id === "words" ? idx(i) : ""}${items[i].html}</div>
+		<div class="side l">${items.slice(from, i).map((it, k) => mini(it, from + k)).join("")}</div>
+		<div class="cur">${items[i].html}</div>
 		<div class="side r">${items.slice(i + 1, i + 9).map((it, k) => mini(it, i + 1 + k)).join("")}</div>
-	</div>
-	<div class="count">${i + 1} / ${n}</div>
-	<div class="nav">
-		<button class="nb" data-a="first" aria-label="First"><i data-lucide="skip-back"></i></button>
-		<button class="nb" data-a="-1" aria-label="Previous"><i data-lucide="chevron-left"></i></button>
-		<button class="nb" data-a="1" aria-label="Next"><i data-lucide="chevron-right"></i></button>
+		<div class="foot">
+			<div class="count">${i + 1} / ${n}</div>
+			<div class="nav">
+				<button class="nb" data-a="first" aria-label="First"><i data-lucide="skip-back"></i></button>
+				<button class="nb" data-a="-1" aria-label="Previous"><i data-lucide="chevron-left"></i></button>
+				<button class="nb" data-a="1" aria-label="Next"><i data-lucide="chevron-right"></i></button>
+			</div>
+		</div>
+		<div class="all ${id}">${items.map((it, j) => mini(it, j, j === i)).join("")}</div>
 	</div>`;
 	icons();
+	const all = $(".all"), on = all.querySelector(".on");
+	if (all.offsetParent && on) all.scrollTop = on.offsetTop - all.clientHeight / 2 + on.offsetHeight / 2;
 }
 
 function phase(k) {
@@ -220,11 +234,11 @@ function phase(k) {
 			else if (b.dataset.a === "first") { G.idx = 0; drawViewer(); }
 			else step(+b.dataset.a);
 		};
-		let sx = 0;
-		body.ontouchstart = (e) => (sx = e.changedTouches[0].clientX);
+		let sx = 0, sy = 0;
+		body.ontouchstart = (e) => { sx = e.changedTouches[0].clientX; sy = e.changedTouches[0].clientY; };
 		body.ontouchend = (e) => {
-			const dx = e.changedTouches[0].clientX - sx;
-			if (Math.abs(dx) > 50) step(dx < 0 ? 1 : -1);
+			const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+			if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) step(dx < 0 ? 1 : -1);
 		};
 	}
 	if (p.k === "rec") drawRecall();
