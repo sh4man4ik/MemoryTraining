@@ -938,3 +938,63 @@ button,
 	padding: 5px 8px;
 	min-height: 44px;
 }
+.viewer .side {
+	max-height: 280px;
+	overflow-y: auto;
+	align-content: flex-start;
+	padding: 2px 4px;
+	scrollbar-width: thin;
+}
+.slot,
+.pal,
+.rp {
+	position: relative;
+}
+.slots.cards .slot,
+.palette.cards .pal,
+.rgrid.cards .rp {
+	aspect-ratio: 167 / 243;
+	min-height: 0;
+}
+.slots.images .slot,
+.palette.images .pal,
+.rgrid.images .rp {
+	aspect-ratio: 1;
+	min-height: 0;
+}
+.slots .slot img,
+.palette .pal img,
+.rgrid .rp img {
+	position: absolute;
+	inset: 4px;
+	width: calc(100% - 8px);
+	height: calc(100% - 8px);
+	max-width: none;
+	max-height: none;
+	margin: 0;
+	object-fit: contain;
+}
+.slots.images .slot img,
+.palette.images .pal img,
+.rgrid.images .rp img {
+	object-fit: cover;
+	border-radius: 4px;
+}
+.rp .empty {
+	color: #dc2626;
+	font-size: 1.4rem;
+	font-weight: 700;
+}
+.menu {
+	grid-auto-rows: 1fr;
+}
+.tile {
+	justify-content: flex-start;
+	min-height: 170px;
+	padding: 20px 12px;
+}
+.tile {
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+}

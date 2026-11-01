@@ -190,11 +190,10 @@ document.addEventListener("keydown", (e) => {
 function drawViewer() {
 	const { items } = G.data, i = G.idx, id = G.m.id, n = items.length;
 	const mini = (it, j, on) => `<button class="mini${on ? " on" : ""}" data-j="${j}">${it.html}</button>`;
-	const from = Math.max(0, i - 8);
 	$("#body").innerHTML = `<div class="viewer ${id}">
-		<div class="side l">${items.slice(from, i).map((it, k) => mini(it, from + k)).join("")}</div>
+		<div class="side l">${items.slice(0, i).map((it, j) => mini(it, j)).join("")}</div>
 		<div class="cur">${items[i].html}</div>
-		<div class="side r">${items.slice(i + 1, i + 9).map((it, k) => mini(it, i + 1 + k)).join("")}</div>
+		<div class="side r">${items.slice(i + 1).map((it, k) => mini(it, i + 1 + k)).join("")}</div>
 		<div class="foot">
 			<div class="count">${i + 1} / ${n}</div>
 			<div class="nav">
@@ -206,6 +205,8 @@ function drawViewer() {
 		<div class="all ${id}">${items.map((it, j) => mini(it, j, j === i)).join("")}</div>
 	</div>`;
 	icons();
+	const left = $(".side.l");
+	left.scrollTop = left.scrollHeight;
 	const all = $(".all"), on = all.querySelector(".on");
 	if (all.offsetParent && on) all.scrollTop = on.offsetTop - all.clientHeight / 2 + on.offsetHeight / 2;
 }
@@ -257,9 +258,9 @@ function drawRecall() {
 	if (d.kind === "pick") {
 		if (!G.pick) G.pick = { ans: Array(d.items.length).fill(null), act: 0 };
 		const { ans, act } = G.pick;
-		body.innerHTML = `<div class="slots">${d.items.map((_, i) =>
+		body.innerHTML = `<div class="slots ${G.m.id}">${d.items.map((_, i) =>
 			`<button class="slot ${i === act ? "act" : ""}" data-i="${i}"><small>${i + 1}</small>${ans[i] != null ? d.pool[ans[i]].html : ""}</button>`).join("")}</div>
-			<div class="palette">${d.pool.map((p, j) => `<button class="pal ${ans.includes(j) ? "used" : ""}" data-j="${j}">${p.html}</button>`).join("")}</div>`;
+			<div class="palette ${G.m.id}">${d.pool.map((p, j) => `<button class="pal ${ans.includes(j) ? "used" : ""}" data-j="${j}">${p.html}</button>`).join("")}</div>`;
 		body.onclick = (e) => {
 			const s = e.target.closest(".slot"), p = e.target.closest(".pal"), P = G.pick;
 			if (s) { const i = +s.dataset.i; P.ans[i] = null; P.act = i; }
@@ -299,11 +300,11 @@ function results() {
 			return { ok, h: `<div class="rc"><i>${i + 1}</i><div class="rp ${ok ? "ok" : "bad"}">${mine}</div>${ok ? "" : `<div class="rp ok">${it.html}</div>`}</div>` };
 		});
 		good = cells.filter((c) => c.ok).length;
-		list = `<div class="rgrid">${cells.map((c) => c.h).join("")}</div>`;
+		list = `<div class="rgrid ${m.id}">${cells.map((c) => c.h).join("")}</div>`;
 	} else {
 		const rows = d.items.map((it, i) => {
 			const a = G.typed?.[i] || [], ok = it.ans.every((x, j) => norm(x) === norm(a[j] || ""));
-			return { ok, pr: it.prompt || i + 1, v: ok ? it.ans.join(" ") : `${a.join(" ") || "—"} <small>correct: ${it.ans.join(" ")}</small>` };
+			return { ok, pr: it.prompt || i + 1, v: ok ? it.ans.join(" ") : `${a.filter(Boolean).join(" ") || "—"} <small>correct: ${it.ans.join(" ")}</small>` };
 		});
 		good = rows.filter((r) => r.ok).length;
 		list = rows.map((r) => `<div class="res ${r.ok ? "ok" : "bad"}"><div class="pr">${r.pr}</div><div class="v">${r.v}</div></div>`).join("");
