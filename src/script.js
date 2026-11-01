@@ -218,7 +218,7 @@ function phase(k) {
 	const p = PHASES[k], sec = TIMES[p.k], m = G.m;
 	if (sec <= 0 && p.k === "prep") return phase(k + 1);
 
-	$("#play").innerHTML = `<div class="panel" style="--c:${m.c}">
+	$("#play").innerHTML = `<div class="panel run" style="--c:${m.c}">
 		<div class="bar"><b class="ttl">${m.t}</b><span class="tl">${p.label} <span class="t" id="tm">${sec ? fmt(sec) : "∞"}</span></span>
 		<button class="btn main" id="skip">${p.skip}</button></div>
 		<div id="body">${p.k === "prep" ? `<div class="big">${k === 0 ? "Memorization starts soon" : "Recall starts soon"}</div>` : ""}</div></div>`;

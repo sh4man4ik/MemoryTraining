@@ -998,3 +998,288 @@ button,
 	align-items: center;
 	text-align: center;
 }
+:root {
+	--bg: #1b1c1d;
+	--fg: #f3f3f3;
+	--muted: #a9acb1;
+	--card: #222324;
+	--bd: #424447;
+	color-scheme: dark;
+}
+body {
+	font-family:
+		'Lato',
+		system-ui,
+		-apple-system,
+		'Segoe UI',
+		sans-serif;
+}
+header h1 {
+	font-size: 1.9rem;
+	font-weight: 900;
+}
+header p {
+	color: var(--muted);
+}
+.panel {
+	background: #222324;
+	border: 1px solid #44464a;
+	border-radius: 4px;
+}
+.btn {
+	background: #2d2e30;
+	border: 1px solid #55585c;
+	color: #fff;
+	border-radius: 4px;
+	font-weight: 700;
+}
+.btn.main {
+	background: var(--c);
+	border-color: var(--c);
+}
+.ctl input {
+	background: #111;
+	border: 1px solid #55585c;
+	border-radius: 4px;
+	color: #fff;
+}
+.srow {
+	border-top-color: #3a3c3f;
+}
+.srow b {
+	font-weight: 700;
+}
+.flow {
+	border-radius: 4px;
+	background: #181919;
+	border: 1px solid #3a3c3f;
+}
+.flow span {
+	border-radius: 4px;
+	background: #222324;
+}
+
+.tile {
+	padding: 0;
+	gap: 0;
+	overflow: hidden;
+	align-items: stretch;
+	justify-content: flex-start;
+	text-align: center;
+	min-height: 0;
+	border: 1px solid #d5d5d5;
+	border-bottom: 3px solid var(--c);
+	border-radius: 4px;
+	background: #161616;
+}
+.tile:hover {
+	border-color: #fff;
+	border-bottom-color: var(--c);
+}
+.tile .ico {
+	width: 100%;
+	height: 112px;
+	border-radius: 0;
+	background: color-mix(in srgb, var(--c) 30%, #101010);
+}
+.tile .ico svg {
+	width: 54px;
+	height: 54px;
+	stroke-width: 1.5;
+}
+.tile b {
+	padding: 14px 12px 4px;
+	color: var(--c);
+	font-weight: 900;
+}
+.tile small {
+	padding: 0 12px 16px;
+	color: #e2e2e2;
+}
+
+.panel.run {
+	padding: 0;
+	overflow: hidden;
+	border-color: #0d0d0d;
+	border-radius: 4px;
+}
+.run .bar {
+	margin: 0;
+	padding: 12px 16px;
+	background: #2f3032;
+	border-bottom: 1px solid #0d0d0d;
+}
+.run .bar .ttl {
+	font-weight: 900;
+}
+.run .bar .tl {
+	color: #d8d8d8;
+}
+.run .bar .t {
+	color: #fff;
+	font-weight: 400;
+}
+.run .bar .btn.main {
+	background: #21ba45;
+	border-color: #21ba45;
+	color: #fff;
+}
+.run #body {
+	min-height: 380px;
+	padding: 24px 16px;
+	background: linear-gradient(#9c9c9c, #858585);
+}
+.big {
+	color: #fff;
+	font-size: 1.6rem;
+	padding: 90px 0;
+}
+.count {
+	color: #f2f2f2;
+}
+.nb {
+	width: 67px;
+	height: 56px;
+	border-radius: 4px;
+	background: #2185d0;
+}
+.nb:hover {
+	background: #1678c2;
+}
+
+.cur {
+	background: transparent;
+	border: 0;
+	border-radius: 0;
+}
+.viewer.words .cur,
+.viewer.numbers .cur {
+	align-self: center;
+	height: 120px;
+	background: #fff;
+	color: #111;
+	border-radius: 4px;
+}
+.cur .pimg {
+	border: 4px solid #fff;
+	border-radius: 2px;
+	background: #fff;
+}
+.cur .person img {
+	border: 4px solid #fff;
+	border-radius: 2px;
+	background: #fff;
+}
+.cur .person b {
+	background: #fff;
+	color: #111;
+	font-weight: 400;
+	border-radius: 12px;
+	padding: 6px 22px;
+}
+.mini {
+	background: #fff;
+	color: #111;
+	border: 1px solid #555;
+	border-radius: 4px;
+}
+.mini.on,
+.viewer .all .mini.on {
+	background: #ff0;
+	border: 1px solid #111;
+	box-shadow: 0 0 0 2px #111;
+}
+.viewer .all .mini {
+	background: #fff;
+}
+.viewer .all {
+	background: rgba(0, 0, 0, 0.14);
+	border-color: transparent;
+}
+.face {
+	border: 3px solid #fff;
+	border-radius: 2px;
+	object-fit: cover;
+	background: #fff;
+}
+
+.slot {
+	background: #c4c4c4;
+	color: #111;
+	border: 1px solid #111;
+	border-radius: 6px;
+}
+.slot.act {
+	background: #ff0;
+	border-color: #111;
+	box-shadow: none;
+}
+.slot small {
+	background: rgba(255, 255, 255, 0.75);
+	color: #222;
+}
+.pal {
+	background: #fff;
+	border: 1px solid #555;
+	border-radius: 6px;
+}
+.rrow {
+	border-bottom-color: #7a7a7a;
+}
+.rrow .pr {
+	color: #222;
+}
+#body input {
+	background: #fff;
+	color: #111;
+	border: 0;
+	border-radius: 6px;
+	text-align: center;
+}
+#body input:focus {
+	background: #ff0;
+	outline: none;
+}
+#body input::placeholder {
+	color: #999;
+}
+
+.score {
+	color: #fff;
+	font-weight: 900;
+}
+.rp {
+	border-width: 3px;
+	border-radius: 6px;
+}
+.rp.ok {
+	background: rgba(33, 186, 69, 0.28);
+	border-color: #21ba45;
+}
+.rp.bad {
+	background: rgba(219, 40, 40, 0.28);
+	border-color: #db2828;
+}
+.res.ok .v {
+	color: #21ba45;
+}
+.res.bad .v {
+	color: #db2828;
+}
+.rp .empty {
+	color: #db2828;
+}
+
+@media (max-width: 699px) {
+	.run #body {
+		min-height: 300px;
+		padding: 16px 10px;
+	}
+	.run .bar {
+		padding: 10px 12px;
+	}
+	.viewer.words .cur,
+	.viewer.numbers .cur {
+		height: 100px;
+	}
+}
