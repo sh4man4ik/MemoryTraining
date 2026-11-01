@@ -1,6 +1,6 @@
 # What is it?
 
-Memory training website built with Claude, an alternative to Memory League.
+Memory Training website built with Claude, an alternative to Memory League.
 
 # Quick Start
 
