@@ -20,7 +20,7 @@ const RANKS = ["ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "jack", "que
 const CARD_URL = "https://cdn.jsdelivr.net/gh/hayeah/playing-cards-assets@master/svg-cards/";
 const cardHtml = (r, s) => `<img class="cimg" src="${CARD_URL}${r}_of_${s}.svg" alt="${r} of ${s}" />`;
 
-const PHOTO_IDS = Array.from({ length: 90 }, (_, i) => i + 10).filter((i) => i !== 86 && i !== 97);
+const PHOTO_IDS = Array.from({ length: 90 }, (_, i) => i + 10).filter((i) => i !== 86 && i !== 97).slice(0, 80);
 const photoHtml = (id) => `<img class="pimg" src="https://picsum.photos/id/${id}/300/300" alt="" />`;
 
 const INTL = ["fakerDE", "fakerFR", "fakerES", "fakerIT", "fakerPL", "fakerTR", "fakerPT_BR", "fakerNL", "fakerSV", "fakerCS_CZ"].map((k) => F[k]).filter(Boolean);
@@ -61,8 +61,8 @@ const MODES = [
 			return { kind: "pick", pool, items: chosen.map((id) => ({ id: pool.findIndex((p) => p.pid === id), html: photoHtml(id) })) };
 		}
 	},
-	{ id: "names", t: "Names", i: "user", c: "#2f9e44", max: 40, def: 8, gen: (n) => people(n, () => fakerEN) },
-	{ id: "intl", t: "International names", i: "globe", c: "#0c9aa6", max: 40, def: 8, gen: (n) => people(n, () => INTL[rnd(INTL.length)]) },
+	{ id: "names", t: "Names", i: "user", c: "#2f9e44", max: 50, def: 10, gen: (n) => people(n, () => fakerEN) },
+	{ id: "intl", t: "International names", i: "globe", c: "#0c9aa6", max: 50, def: 10, gen: (n) => people(n, () => INTL[rnd(INTL.length)]) },
 	{
 		id: "numbers", t: "Numbers", i: "hash", c: "#3b82f6", max: 200, def: 20,
 		gen: (n) => {
@@ -76,7 +76,7 @@ const MODES = [
 		}
 	},
 	{
-		id: "words", t: "Words", i: "type", c: "#8b5cf6", max: 100, def: 15,
+		id: "words", t: "Words", i: "type", c: "#8b5cf6", max: 100, def: 20,
 		gen: (n) => {
 			const set = new Set();
 			while (set.size < n) { const w = fakerEN.word.noun().toLowerCase(); if (w.length >= 3 && w.length <= 10 && /^[a-z]+$/.test(w)) set.add(w); }
@@ -275,11 +275,20 @@ function drawRecall() {
 		};
 	} else {
 		body.innerHTML = d.items.map((it, i) => `<div class="rrow"><div class="pr">${it.prompt || i + 1}</div><div class="inp">${it.ans.map((_, j) =>
-			`<input data-i="${i}" data-j="${j}" placeholder="${it.ph[j]}" autocomplete="off" autocapitalize="off" ${it.num ? `inputmode="numeric" maxlength="${it.num}"` : ""} />`).join("")}</div></div>`).join("");
+			`<input data-i="${i}" data-j="${j}" placeholder="${it.ph[j]}" autocomplete="off" autocapitalize="off" ${it.num ? `inputmode="numeric" pattern="[0-9]*" enterkeyhint="next" maxlength="${it.num}"` : ""} />`).join("")}</div></div>`).join("");
 		body.onkeydown = (e) => {
-			if (e.key !== "Enter") return;
-			const all = [...body.querySelectorAll("input")];
-			all[all.indexOf(e.target) + 1]?.focus();
+			const all = [...body.querySelectorAll("input")], k = all.indexOf(e.target);
+			if (e.key === "Enter") all[k + 1]?.focus();
+			if (e.key === "Backspace" && !e.target.value) all[k - 1]?.focus();
+		};
+		body.oninput = (e) => {
+			const t = e.target;
+			if (!(t.maxLength > 0)) return;
+			t.value = t.value.replace(/\D/g, "");
+			if (t.value.length >= t.maxLength) {
+				const all = [...body.querySelectorAll("input")];
+				all[all.indexOf(t) + 1]?.focus();
+			}
 		};
 		body.querySelector("input")?.focus();
 	}
