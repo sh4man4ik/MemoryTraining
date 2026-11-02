@@ -113,15 +113,21 @@ function showView(v) {
 
 const fmt = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 
+const STEP = { prep: 5, mem: 10, rec: 10 };
+const ctl = (attrs, v, step, min, max, unit = "") =>
+	`<div class="ctl"><button class="step" type="button" data-d="-${step}" data-min="${min}" data-max="${max}" aria-label="Decrease">−</button>` +
+	`<input ${attrs} type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" value="${v}" />` +
+	`<button class="step" type="button" data-d="${step}" data-min="${min}" data-max="${max}" aria-label="Increase">+</button>${unit ? `<span>${unit}</span>` : ""}</div>`;
+
 function openSetup(m) {
 	const count = Math.min(load("mt_count_" + m.id, m.def), m.max);
 	const el = $("#setup");
 	el.innerHTML = `<div class="panel setup" style="--c:${m.c}">
 		<div class="hero"><span class="ico"><i data-lucide="${m.i}"></i></span><div><h2>${m.t}</h2><p>${DESC[m.id]}</p></div></div>
 		<div class="srow"><div><b>${UNIT[m.id]} to memorize</b><small>Up to ${m.max}${m.id === "numbers" ? ", shown in pairs" : ""}</small></div>
-			<div class="ctl"><input id="n" type="number" min="1" max="${m.max}" value="${count}" /></div></div>
+			${ctl('id="n"', count, 1, 1, m.max)}</div>
 		${TIME_FIELDS.map(([k, l, h]) => `<div class="srow"><div><b>${l}</b><small>${h}</small></div>
-			<div class="ctl"><input data-t="${k}" type="number" min="0" value="${TIMES[k]}" /><span>seconds</span></div></div>`).join("")}
+			${ctl(`data-t="${k}"`, TIMES[k], STEP[k], 0, 3600, "seconds")}</div>`).join("")}
 		<div class="flow" id="flow"></div>
 		<div class="row-btns"><button class="btn main" id="go">Start</button><button class="btn" id="back">Back</button></div>
 	</div>`;
@@ -138,7 +144,21 @@ function openSetup(m) {
 			.map(([l, v], i) => `${i ? "<i>›</i>" : ""}<span>${l} <b>${v}</b></span>`).join("");
 	};
 	flow();
-	el.oninput = flow;
+	el.onclick = (e) => {
+		const b = e.target.closest(".step");
+		if (!b) return;
+		const i = b.parentElement.querySelector("input");
+		i.value = Math.min(+b.dataset.max, Math.max(+b.dataset.min, (parseInt(i.value) || 0) + +b.dataset.d));
+		flow();
+	};
+	el.oninput = (e) => {
+		if (e.target.tagName === "INPUT") e.target.value = e.target.value.replace(/\D/g, "");
+		flow();
+	};
+	el.onfocusin = (e) => {
+		const t = e.target;
+		if (t.tagName === "INPUT") setTimeout(() => t.select(), 0);
+	};
 	$("#back").onclick = () => showView("menu");
 	const go = () => {
 		const n = Math.max(1, Math.min(m.max, parseInt($("#n").value) || m.def));
