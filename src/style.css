@@ -748,7 +748,9 @@ button:focus-visible {
 		padding: 0;
 	}
 	.srow {
-		flex-wrap: wrap;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 8px;
 	}
 	.bar {
 		padding: 10px 12px;
