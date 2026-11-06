@@ -109,6 +109,7 @@ icons();
 function showView(v) {
 	["menu", "setup", "play"].forEach((id) => ($("#" + id).hidden = id !== v));
 	document.querySelector("header").hidden = v !== "menu";
+	window.scrollTo(0, 0);
 }
 
 const fmt = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
