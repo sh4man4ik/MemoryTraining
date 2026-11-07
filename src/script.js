@@ -94,8 +94,21 @@ const DESC = {
 	words: "Memorize random words.",
 };
 const UNIT = { cards: "Cards", images: "Images", names: "Names", intl: "Names", numbers: "Digits", words: "Words" };
-const saved = load("mt_times3", {});
-const TIMES = { prep: saved.prep ?? 10, mem: saved.mem ?? 90, rec: saved.rec ?? 60 };
+const DEFAULT_TIMES = { prep: 10, mem: 90, rec: 60 };
+const clampInt = (v, min, max, d) => {
+	const n = parseInt(v);
+	return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : d;
+};
+function getSettings(m) {
+	const old = load("mt_times3", {});
+	const s = load("mt_settings_" + m.id, null) || {};
+	return {
+		n: clampInt(s.n ?? load("mt_count_" + m.id, m.def), 1, m.max, m.def),
+		prep: clampInt(s.prep ?? old.prep, 0, 3600, DEFAULT_TIMES.prep),
+		mem: clampInt(s.mem ?? old.mem, 0, 3600, DEFAULT_TIMES.mem),
+		rec: clampInt(s.rec ?? old.rec, 0, 3600, DEFAULT_TIMES.rec),
+	};
+}
 const TIME_FIELDS = [
 	["prep", "Preparation time", "Rest before memorizing and before recall"],
 	["mem", "Memorization time", "0 = no limit"],
@@ -122,14 +135,15 @@ const ctl = (attrs, v, step, min, max, unit = "") =>
 	`<button class="step" type="button" data-d="${step}" data-min="${min}" data-max="${max}" aria-label="Increase">+</button>${unit ? `<span>${unit}</span>` : ""}</div>`;
 
 function openSetup(m) {
-	const count = Math.min(load("mt_count_" + m.id, m.def), m.max);
+	const st = getSettings(m);
+	const count = st.n;
 	const el = $("#setup");
 	el.innerHTML = `<div class="panel setup" style="--c:${m.c}">
 		<div class="hero"><span class="ico"><i data-lucide="${m.i}"></i></span><div><h2>${m.t}</h2><p>${DESC[m.id]}</p></div></div>
 		<div class="srow"><div><b>${UNIT[m.id]} to memorize</b><small>Up to ${m.max}${m.id === "numbers" ? ", shown in pairs" : ""}</small></div>
 			${ctl('id="n"', count, 1, 1, m.max)}</div>
 		${TIME_FIELDS.map(([k, l, h]) => `<div class="srow"><div><b>${l}</b><small>${h}</small></div>
-			${ctl(`data-t="${k}"`, TIMES[k], STEP[k], 0, 3600, "seconds")}</div>`).join("")}
+			${ctl(`data-t="${k}"`, st[k], STEP[k], 0, 3600, "seconds")}</div>`).join("")}
 		<div class="flow" id="flow"></div>
 		<div class="row-btns"><button class="btn main" id="go">Start</button><button class="btn" id="back">Back</button></div>
 	</div>`;
@@ -164,10 +178,9 @@ function openSetup(m) {
 	$("#back").onclick = () => showView("menu");
 	const go = () => {
 		const n = Math.max(1, Math.min(m.max, parseInt($("#n").value) || m.def));
-		Object.assign(TIMES, read());
-		save("mt_times3", TIMES);
-		save("mt_count_" + m.id, n);
-		start(m, n);
+		const times = read();
+		save("mt_settings_" + m.id, { n, ...times });
+		start(m, n, times);
 	};
 	$("#go").onclick = go;
 	el.onkeydown = (e) => e.key === "Enter" && go();
@@ -190,8 +203,8 @@ function preload(d) {
 	urls.forEach((u) => { const im = new Image(); im.src = u; });
 }
 
-function start(m, n) {
-	G = { m, n, data: m.gen(n), timer: null, idx: 0, stage: "" };
+function start(m, n, times) {
+	G = { m, n, times, data: m.gen(n), timer: null, idx: 0, stage: "" };
 	preload(G.data);
 	showView("play");
 	phase(0);
@@ -237,7 +250,7 @@ function phase(k) {
 	clearInterval(G.timer);
 	G.stage = "";
 	if (k === 4) { collect(); return results(); }
-	const p = PHASES[k], sec = TIMES[p.k], m = G.m;
+	const p = PHASES[k], sec = G.times[p.k], m = G.m;
 	if (sec <= 0 && p.k === "prep") return phase(k + 1);
 
 	$("#play").innerHTML = `<div class="panel run" style="--c:${m.c}">
@@ -347,6 +360,6 @@ function results() {
 		${list}
 	</div>`;
 	icons();
-	$("#again").onclick = () => start(m, G.n);
+	$("#again").onclick = () => start(m, G.n, G.times);
 	$("#menu-btn").onclick = () => showView("menu");
 }
