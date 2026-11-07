@@ -32,13 +32,13 @@ function people(n, pickFaker) {
 	while (items.length < n) {
 		const [g, i] = faces[items.length];
 		const f = pickFaker();
-		const a = f.person.firstName(g === "men" ? "male" : "female"), b = f.person.lastName();
+		const a = f.person.firstName(g === "men" ? "male" : "female");
 		if (seen.has(norm(a))) continue;
 		seen.add(norm(a));
 		items.push({
-			html: `<div class="person"><img src="${portrait(g, i)}" alt="" /><b>${a} ${b}</b></div>`,
+			html: `<div class="person"><img src="${portrait(g, i)}" alt="" /><b>${a}</b></div>`,
 			prompt: `<img class="face" src="${portrait(g, i)}" alt="" />`,
-			ans: [a, b], ph: ["First name", "Last name"],
+			ans: [a], ph: ["Name"],
 		});
 	}
 	return { kind: "type", items };
