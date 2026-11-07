@@ -4,15 +4,18 @@
 	--g1: rgba(255, 255, 255, 0.06);
 	--g2: rgba(255, 255, 255, 0.13);
 	--g3: rgba(255, 255, 255, 0.28);
+	--hover: rgba(255, 255, 255, 0.36);
+	--press: rgba(255, 255, 255, 0.46);
+	--sel: rgba(255, 255, 255, 0.4);
 	--gline: rgba(255, 255, 255, 0.95);
 	--gline2: rgba(16, 33, 77, 0.35);
 	--line: rgba(16, 33, 77, 0.14);
 	--ok: #1f78c8;
 	--ok-bg: rgba(74, 157, 224, 0.22);
 	--ok-line: rgba(31, 120, 200, 0.55);
-	--bad: #b8435f;
-	--bad-bg: rgba(226, 130, 155, 0.2);
-	--bad-line: rgba(184, 67, 95, 0.5);
+	--bad: #a4506b;
+	--bad-bg: rgba(214, 148, 170, 0.16);
+	--bad-line: rgba(164, 80, 107, 0.4);
 	--shade: rgba(16, 33, 77, 0.85);
 	--blur: blur(4px) saturate(110%);
 	--spec: inset 0 1px 0 #fff, 0 0 0 1px rgba(16, 33, 77, 0.1), 0 12px 30px -14px rgba(40, 80, 150, 0.35);
@@ -264,7 +267,7 @@ input {
 	border-radius: var(--r2);
 }
 input:focus {
-	background: var(--g3);
+	background: var(--sel);
 	border-color: var(--fg);
 	outline: none;
 }
@@ -597,7 +600,7 @@ input:focus {
 }
 .mini.on,
 .viewer .all .mini.on {
-	background: #fff;
+	background: var(--sel);
 	outline: 2px solid var(--fg);
 }
 
@@ -665,7 +668,7 @@ input:focus {
 	border: 2px dashed var(--gline2);
 }
 .slot.act {
-	background: #fff;
+	background: var(--sel);
 	border-style: solid;
 	border-color: var(--fg);
 }
@@ -753,7 +756,7 @@ input:focus {
 	border-radius: var(--r2);
 }
 #body input:focus {
-	background: #fff;
+	background: var(--sel);
 	border-color: var(--fg);
 }
 
@@ -853,7 +856,7 @@ input:focus {
 	.btn:hover,
 	.step:hover,
 	.nb:hover {
-		background: rgba(255, 255, 255, 0.55);
+		background: var(--hover);
 	}
 	input:hover {
 		background: var(--g2);
@@ -872,7 +875,7 @@ input:focus {
 .btn:active,
 .step:active,
 .nb:active {
-	background: rgba(255, 255, 255, 0.75);
+	background: var(--press);
 }
 @media (prefers-reduced-motion: reduce) {
 	* {
@@ -998,4 +1001,41 @@ input:focus {
 	.rrow .inp {
 		flex-wrap: wrap;
 	}
+}
+.links {
+	display: flex;
+	justify-content: center;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-top: 32px;
+}
+.links a {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 7px 16px;
+	font-size: 0.88rem;
+	font-weight: 600;
+	color: var(--muted);
+	text-decoration: none;
+	background: var(--g2);
+	border: 1px solid var(--gline);
+	border-radius: 999px;
+	transition:
+		background-color 0.15s,
+		color 0.15s;
+}
+.links a svg {
+	width: 16px;
+	height: 16px;
+	stroke-width: 2;
+}
+@media (hover: hover) {
+	.links a:hover {
+		color: var(--fg);
+		background: var(--hover);
+	}
+}
+.links a:active {
+	background: var(--press);
 }

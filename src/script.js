@@ -109,6 +109,7 @@ icons();
 function showView(v) {
 	["menu", "setup", "play"].forEach((id) => ($("#" + id).hidden = id !== v));
 	document.querySelector("header").hidden = v !== "menu";
+	document.querySelector("footer").hidden = v === "play";
 	window.scrollTo(0, 0);
 }
 
