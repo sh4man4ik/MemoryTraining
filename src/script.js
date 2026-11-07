@@ -64,7 +64,7 @@ const MODES = [
 	{ id: "names", t: "Names", i: "user", c: "#2f9e44", max: 50, def: 10, gen: (n) => people(n, () => fakerEN) },
 	{ id: "intl", t: "International names", i: "globe", c: "#0c9aa6", max: 50, def: 10, gen: (n) => people(n, () => INTL[rnd(INTL.length)]) },
 	{
-		id: "numbers", t: "Numbers", i: "hash", c: "#3b82f6", max: 200, def: 20,
+		id: "numbers", t: "Numbers", i: "hash", c: "#3b82f6", max: 200, def: 10,
 		gen: (n) => {
 			const digits = Array.from({ length: n }, () => rnd(10)).join("");
 			const items = [];
@@ -76,7 +76,7 @@ const MODES = [
 		}
 	},
 	{
-		id: "words", t: "Words", i: "type", c: "#8b5cf6", max: 100, def: 20,
+		id: "words", t: "Words", i: "type", c: "#8b5cf6", max: 100, def: 10,
 		gen: (n) => {
 			const set = new Set();
 			while (set.size < n) { const w = fakerEN.word.noun().toLowerCase(); if (w.length >= 3 && w.length <= 10 && /^[a-z]+$/.test(w)) set.add(w); }
@@ -100,13 +100,12 @@ const clampInt = (v, min, max, d) => {
 	return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : d;
 };
 function getSettings(m) {
-	const old = load("mt_times3", {});
 	const s = load("mt_settings_" + m.id, null) || {};
 	return {
-		n: clampInt(s.n ?? load("mt_count_" + m.id, m.def), 1, m.max, m.def),
-		prep: clampInt(s.prep ?? old.prep, 0, 3600, DEFAULT_TIMES.prep),
-		mem: clampInt(s.mem ?? old.mem, 0, 3600, DEFAULT_TIMES.mem),
-		rec: clampInt(s.rec ?? old.rec, 0, 3600, DEFAULT_TIMES.rec),
+		n: clampInt(s.n, 1, m.max, m.def),
+		prep: clampInt(s.prep, 0, 3600, DEFAULT_TIMES.prep),
+		mem: clampInt(s.mem, 0, 3600, DEFAULT_TIMES.mem),
+		rec: clampInt(s.rec, 0, 3600, DEFAULT_TIMES.rec),
 	};
 }
 const TIME_FIELDS = [
