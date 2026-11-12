@@ -146,7 +146,7 @@ header p {
 	line-height: 1.3;
 }
 .tile small {
-	padding: 0 4px;
+	padding: 0 4px 12px;
 	font-size: 0.9rem;
 	line-height: 1.4;
 	color: var(--muted);
@@ -1102,5 +1102,46 @@ input:focus {
 	.tile .wm svg {
 		width: 104px;
 		height: 104px;
+	}
+}
+.rec {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 3px 10px;
+	font-size: 0.8rem;
+	font-weight: 500;
+	line-height: 1.4;
+	color: var(--muted);
+	background: var(--bg);
+	border: 1px solid var(--surface3);
+	border-radius: 10px;
+}
+.rec svg {
+	flex: none;
+	width: 14px;
+	height: 14px;
+	color: var(--c);
+}
+.rec.new {
+	color: var(--fg);
+	border-color: var(--c);
+}
+.tile .rec {
+	align-self: flex-start;
+	margin: auto 4px 0;
+}
+.hero .rec {
+	margin-top: 8px;
+}
+.recs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-bottom: 16px;
+}
+@media (max-width: 699px) {
+	.rec {
+		font-size: 0.76rem;
 	}
 }

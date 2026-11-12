@@ -114,18 +114,34 @@ const TIME_FIELDS = [
 	["rec", "Recall time", "0 = no limit"],
 ];
 
-$("#menu").innerHTML = MODES.map((m) => `<button class="tile" style="--c:${m.c}" data-id="${m.id}"><span class="ico"><i data-lucide="${m.i}"></i></span><b>${m.t}</b><small>${DESC[m.id]}</small></button>`).join("");
+function renderMenu() {
+	$("#menu").innerHTML = MODES.map((m) => `<button class="tile" style="--c:${m.c}" data-id="${m.id}"><span class="ico"><span class="wm"><i data-lucide="${m.i}"></i></span><i data-lucide="${m.i}"></i><em class="badge">up to ${m.max}</em></span><b>${m.t}</b><small>${DESC[m.id]}</small>${recChip(m.id)}</button>`).join("");
+	icons();
+}
 $("#menu").onclick = (e) => { const b = e.target.closest(".tile"); if (b) openSetup(MODES.find((m) => m.id === b.dataset.id)); };
-icons();
 
 function showView(v) {
 	["menu", "setup", "play"].forEach((id) => ($("#" + id).hidden = id !== v));
 	document.querySelector("header").hidden = v !== "menu";
 	document.querySelector("footer").hidden = v === "play";
+	if (v === "menu") renderMenu();
 	window.scrollTo(0, 0);
 }
 
 const fmt = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+
+const REC_UNIT = { cards: ["card", "cards"], images: ["image", "images"], names: ["name", "names"], intl: ["name", "names"], numbers: ["digit", "digits"], words: ["word", "words"] };
+const dur = (s) => (s < 60 ? `${s} sec` : fmt(s));
+const getRecord = (id) => {
+	const r = load("mt_record_" + id, null);
+	return r && Number.isFinite(r.n) && Number.isFinite(r.t) && r.n > 0 ? r : null;
+};
+const isBetter = (a, b) => a.n > b.n || (a.n === b.n && a.t < b.t);
+const recText = (id, r) => `${r.n} ${REC_UNIT[id][r.n === 1 ? 0 : 1]} in ${dur(r.t)}`;
+const recChip = (id) => {
+	const r = getRecord(id);
+	return `<span class="rec"><i data-lucide="trophy"></i>${r ? `Record: ${recText(id, r)}` : "No record set yet"}</span>`;
+};
 
 const STEP = { prep: 5, mem: 10, rec: 10 };
 const ctl = (attrs, v, step, min, max, unit = "") =>
@@ -138,7 +154,7 @@ function openSetup(m) {
 	const count = st.n;
 	const el = $("#setup");
 	el.innerHTML = `<div class="panel setup" style="--c:${m.c}">
-		<div class="hero"><span class="ico"><i data-lucide="${m.i}"></i></span><div><h2>${m.t}</h2><p>${DESC[m.id]}</p></div></div>
+		<div class="hero"><span class="ico"><i data-lucide="${m.i}"></i></span><div><h2>${m.t}</h2><p>${DESC[m.id]}</p>${recChip(m.id)}</div></div>
 		<div class="srow"><div><b>${UNIT[m.id]} to memorize</b><small>Up to ${m.max}${m.id === "numbers" ? ", shown in pairs" : ""}</small></div>
 			${ctl('id="n"', count, 1, 1, m.max)}</div>
 		${TIME_FIELDS.map(([k, l, h]) => `<div class="srow"><div><b>${l}</b><small>${h}</small></div>
@@ -203,7 +219,7 @@ function preload(d) {
 }
 
 function start(m, n, times) {
-	G = { m, n, times, data: m.gen(n), timer: null, idx: 0, stage: "" };
+	G = { m, n, times, data: m.gen(n), timer: null, idx: 0, stage: "", memStart: 0, memTime: 0 };
 	preload(G.data);
 	showView("play");
 	phase(0);
@@ -247,6 +263,10 @@ function drawViewer() {
 
 function phase(k) {
 	clearInterval(G.timer);
+	if (G.stage === "mem" && G.memStart) {
+		G.memTime = Math.max(1, Math.round((Date.now() - G.memStart) / 1000));
+		G.memStart = 0;
+	}
 	G.stage = "";
 	if (k === 4) { collect(); return results(); }
 	const p = PHASES[k], sec = G.times[p.k], m = G.m;
@@ -261,6 +281,7 @@ function phase(k) {
 	if (p.k === "mem") {
 		G.idx = 0;
 		G.stage = "mem";
+		G.memStart = Date.now();
 		drawViewer();
 		body.onclick = (e) => {
 			const b = e.target.closest("[data-j],[data-a]");
@@ -335,26 +356,42 @@ function collect() {
 
 function results() {
 	const { m, data: d } = G;
-	let good, total = d.items.length, list;
+	let good, total = d.items.length, list, oks;
 	if (d.kind === "pick") {
 		const cells = d.items.map((it, i) => {
 			const a = G.pick?.ans[i], ok = a === it.id;
 			const mine = a != null ? d.pool[a].html : '<span class="empty">—</span>';
 			return { ok, h: `<div class="rc"><i>${i + 1}</i><div class="rp ${ok ? "ok" : "bad"}">${mine}</div>${ok ? "" : `<div class="rp ok">${it.html}</div>`}</div>` };
 		});
-		good = cells.filter((c) => c.ok).length;
+		oks = cells.map((c) => c.ok);
+		good = oks.filter(Boolean).length;
 		list = `<div class="rgrid ${m.id}">${cells.map((c) => c.h).join("")}</div>`;
 	} else {
 		const rows = d.items.map((it, i) => {
 			const a = G.typed?.[i] || [], ok = it.ans.every((x, j) => norm(x) === norm(a[j] || ""));
 			return { ok, pr: it.prompt || i + 1, v: ok ? it.ans.join(" ") : `${a.filter(Boolean).join(" ") || "—"} <small>correct: ${it.ans.join(" ")}</small>` };
 		});
-		good = rows.filter((r) => r.ok).length;
+		oks = rows.map((r) => r.ok);
+		good = oks.filter(Boolean).length;
 		list = rows.map((r) => `<div class="res ${r.ok ? "ok" : "bad"}"><div class="pr">${r.pr}</div><div class="v">${r.v}</div></div>`).join("");
 	}
+	let units = good, totalUnits = total;
+	if (m.id === "numbers") {
+		units = d.items.reduce((sum, it, i) => sum + (oks[i] ? it.ans[0].length : 0), 0);
+		totalUnits = d.items.reduce((sum, it) => sum + it.ans[0].length, 0);
+	}
+	const memTime = G.memTime || 1;
+	const mine = { n: units, t: memTime };
+	const prev = getRecord(m.id);
+	const isNew = units > 0 && (!prev || isBetter(mine, prev));
+	if (isNew) save("mt_record_" + m.id, { ...mine, d: Date.now() });
+	const recLine = isNew
+		? `<span class="rec new"><i data-lucide="trophy"></i>New record! ${recText(m.id, mine)}${prev ? ` (previous: ${recText(m.id, prev)})` : ""}</span>`
+		: recChip(m.id);
 	$("#play").innerHTML = `<div class="panel" style="--c:${m.c}">
 		<h2><span class="ico"><i data-lucide="${m.i}"></i></span>${m.t}: results</h2>
-		<div class="score">${good} / ${total}</div>
+		<div class="score">${units} / ${totalUnits}</div>
+		<div class="recs">${recLine}<span class="rec"><i data-lucide="timer"></i>Memorization time: ${dur(memTime)}</span></div>
 		<div class="row-btns" style="margin-bottom:16px"><button class="btn main" id="again">Try again</button><button class="btn" id="menu-btn">Menu</button></div>
 		${list}
 	</div>`;
@@ -362,3 +399,5 @@ function results() {
 	$("#again").onclick = () => start(m, G.n, G.times);
 	$("#menu-btn").onclick = () => showView("menu");
 }
+
+renderMenu();
