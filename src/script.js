@@ -115,7 +115,7 @@ const TIME_FIELDS = [
 ];
 
 function renderMenu() {
-	$("#menu").innerHTML = MODES.map((m) => `<button class="tile" style="--c:${m.c}" data-id="${m.id}"><span class="ico"><span class="wm"><i data-lucide="${m.i}"></i></span><i data-lucide="${m.i}"></i><em class="badge">up to ${m.max}</em></span><b>${m.t}</b><small>${DESC[m.id]}</small>${recChip(m.id)}</button>`).join("");
+	$("#menu").innerHTML = MODES.map((m) => `<button class="tile" style="--c:${m.c}" data-id="${m.id}"><span class="ico"><span class="wm"><i data-lucide="${m.i}"></i></span><i data-lucide="${m.i}"></i></span><b>${m.t}</b><small>${DESC[m.id]}</small>${recChip(m.id)}</button>`).join("");
 	icons();
 }
 $("#menu").onclick = (e) => { const b = e.target.closest(".tile"); if (b) openSetup(MODES.find((m) => m.id === b.dataset.id)); };
